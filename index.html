@@ -62,7 +62,7 @@
         <!-- Chat Area -->
         <div id="chat-window" class="chat-container overflow-y-auto p-4 flex flex-col gap-4">
             <div class="message-bubble bg-gray-100 text-gray-800 p-3 rounded-2xl rounded-tl-none self-start shadow-sm">
-                <p class="text-sm">Greetings, Tiger! 🐯 I am Pier. I am now connected and ready to help you with anything related to UST Senior High School. How can I assist you today?</p>
+                <p class="text-sm">Greetings, Tiger! 🐯 I am Pier. I'm ready to help you with anything related to UST Senior High School. How can I assist you today?</p>
             </div>
         </div>
 
@@ -83,11 +83,13 @@
     </div>
 
     <script>
-        
-        const p1 = "AIzaSyB-wb5ERj6CiNrfj";
-        const p2 = "DkdXmFahunD5t1NbW4";
-       
-        const apiKey = p1 + p2; 
+        /**
+         * UPDATED KEY INTEGRATION
+         * Ensure there are no spaces in these strings.
+         */
+        const p1 = "AIzaSyB-wb5ERj6CiNrf";
+        const p2 = "jDkdXmFahunD5t1NbW4";
+        const apiKey = (p1 + p2).trim(); 
 
         const chatWindow = document.getElementById('chat-window');
         const userInput = document.getElementById('user-input');
@@ -98,8 +100,7 @@
         - Location: Primarily Blessed Pier Giorgio Frassati, O.P. Building.
         - Patron: Blessed Pier Giorgio Frassati (Man of the Eight Beatitudes).
         - Values: Competence, Commitment, Compassion.
-        - Tone: Polite, welcoming, Thomasian spirit. Use tiger emojis 🐯 and school colors references. 
-        - Goal: Answer questions about strands, history, and values accurately.`;
+        - Tone: Polite, welcoming, Thomasian spirit. Use tiger emojis 🐯.`;
 
         async function sendMessage() {
             const message = userInput.value.trim();
@@ -123,6 +124,10 @@
                 removeLoadingIndicator(loadingId);
 
                 if (data.error) {
+                    // Check for specific restriction errors
+                    if (data.error.status === "PERMISSION_DENIED") {
+                        throw new Error(`Google Cloud Restriction Error: ${data.error.message}`);
+                    }
                     throw new Error(data.error.message);
                 }
                 
@@ -130,11 +135,15 @@
                 appendMessage(botReply, 'bot');
             } catch (error) {
                 removeLoadingIndicator(loadingId);
-                console.error("Connection Error:", error);
+                console.error("Detailed Error Log:", error);
                 
-                let errorDisplay = "I apologize, Tiger. I'm having trouble connecting to the den right now.";
-                if (error.message.includes("403")) {
-                    errorDisplay = "<b>Error 403:</b> Access denied. Please ensure your Google Cloud Console restriction includes <i>https://rpescalona17.github.io/*</i>! 🐯";
+                let errorDisplay = `<b>I encountered a hurdle, Tiger.</b><br><br>`;
+                if (error.message.includes("403") || error.message.includes("Restriction")) {
+                    errorDisplay += `My access is being blocked by Google. Please ensure your API key in Google Cloud Console is restricted to:<br><code class="bg-gray-200 p-1">https://rpescalona17.github.io/*</code>`;
+                } else if (error.message.includes("API key not valid")) {
+                    errorDisplay += `The API key seems invalid. Please double-check that you copied the whole key without spaces.`;
+                } else {
+                    errorDisplay += `Details: ${error.message}`;
                 }
                 
                 appendMessage(errorDisplay, 'bot');
@@ -147,7 +156,6 @@
                 ? 'message-bubble bg-teal-ust text-white p-3 rounded-2xl rounded-tr-none self-end shadow-md' 
                 : 'message-bubble bg-white text-gray-800 p-3 rounded-2xl rounded-tl-none self-start border border-gray-200 shadow-sm';
             
-            // Allow basic HTML for the troubleshooting messages
             div.innerHTML = `<p class="text-sm">${text.replace(/\n/g, '<br>')}</p>`;
             chatWindow.appendChild(div);
             chatWindow.scrollTop = chatWindow.scrollHeight;
@@ -158,7 +166,7 @@
             const div = document.createElement('div');
             div.id = id;
             div.className = 'self-start flex items-center gap-2 p-2';
-            div.innerHTML = `<div class="loader"></div><span class="text-xs text-gray-400 italic">Pier is thinking...</span>`;
+            div.innerHTML = `<div class="loader"></div>`;
             chatWindow.appendChild(div);
             chatWindow.scrollTop = chatWindow.scrollHeight;
             return id;

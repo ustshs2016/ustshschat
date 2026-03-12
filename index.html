@@ -90,7 +90,6 @@
     <script>
         /**
          * API KEY INTEGRATION
-         * Split into two parts to prevent automated scanner deactivation.
          */
         const p1 = "AIzaSyB-wb5ERj6CiNrf";
         const p2 = "jDkdXmFahunD5t1NbW4";
@@ -99,13 +98,8 @@
         const chatWindow = document.getElementById('chat-window');
         const userInput = document.getElementById('user-input');
 
-        const systemPrompt = `You are Pier, the official virtual assistant for the University of Santo Tomas (UST) Senior High School. 
-        Core Facts: 
-        - Established: 2016.
-        - Location: Primarily Blessed Pier Giorgio Frassati, O.P. Building.
-        - Patron: Blessed Pier Giorgio Frassati (Man of the Eight Beatitudes).
-        - Values: Competence, Commitment, Compassion.
-        - Tone: Polite, welcoming, Thomasian spirit. Use tiger emojis 🐯.`;
+        // Combined into the main content block for better compatibility across API versions
+        const identityPrompt = "You are Pier, the official virtual assistant for the University of Santo Tomas (UST) Senior High School. Established: 2016. Location: Blessed Pier Giorgio Frassati, O.P. Building. Patron: Blessed Pier Giorgio Frassati. Values: Competence, Commitment, Compassion. Tone: Polite, welcoming, Thomasian spirit with tiger emojis 🐯.";
 
         async function sendMessage() {
             const message = userInput.value.trim();
@@ -116,31 +110,34 @@
             const loadingId = addLoadingIndicator();
 
             try {
-                // Switching to v1 stable endpoint to resolve the 404 Model Not Found error
-                const url = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+                // Using v1beta1 to re-enable system instructions or v1 with fallback structure
+                const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
                 
                 const response = await fetch(url, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        contents: [{ parts: [{ text: message }] }],
-                        // System instruction format for v1 API
-                        systemInstruction: { parts: [{ text: systemPrompt }] }
+                        contents: [
+                            {
+                                role: "user",
+                                parts: [{ text: `${identityPrompt}\n\nUser Question: ${message}` }]
+                            }
+                        ]
                     })
                 });
                 
                 const data = await response.json();
                 removeLoadingIndicator(loadingId);
 
-                if (data.error) {
-                    throw new Error(data.error.message || data.error.status);
+                if (!response.ok) {
+                    throw new Error(data.error?.message || `Error ${response.status}`);
                 }
                 
-                if (data.candidates && data.candidates[0].content) {
+                if (data.candidates && data.candidates[0]?.content) {
                     const botReply = data.candidates[0].content.parts[0].text;
                     appendMessage(botReply, 'bot');
                 } else {
-                    throw new Error("Empty response from AI den.");
+                    throw new Error("I'm having trouble thinking right now. Please try again.");
                 }
 
             } catch (error) {
@@ -150,10 +147,10 @@
                 let errorDisplay = `<b>I encountered a hurdle, Tiger.</b><br><br>`;
                 
                 if (error.message.includes("403") || error.message.includes("PERMISSION_DENIED")) {
-                    errorDisplay += `My access is blocked by Google restrictions. Ensure your Google Console includes:<br><br>
+                    errorDisplay += `Access blocked. Ensure your Google Console allows:<br>
                     <code class="bg-gray-200 p-1 block my-2 text-xs">https://ustshs2016.github.io/*</code>`;
-                } else if (error.message.includes("404")) {
-                    errorDisplay += `The AI model could not be found in this region. Please verify your API project settings.`;
+                } else if (error.message.includes("API key not valid")) {
+                    errorDisplay += `The API key appears to be invalid or deleted.`;
                 } else {
                     errorDisplay += `Details: ${error.message}`;
                 }

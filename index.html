@@ -116,11 +116,15 @@
             const loadingId = addLoadingIndicator();
 
             try {
-                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
+                // Switching to v1 stable endpoint to resolve the 404 Model Not Found error
+                const url = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+                
+                const response = await fetch(url, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         contents: [{ parts: [{ text: message }] }],
+                        // System instruction format for v1 API
                         systemInstruction: { parts: [{ text: systemPrompt }] }
                     })
                 });
@@ -129,25 +133,27 @@
                 removeLoadingIndicator(loadingId);
 
                 if (data.error) {
-                    if (data.error.status === "PERMISSION_DENIED" || response.status === 403) {
-                        throw new Error(`Restriction Error: ${data.error.message}`);
-                    }
-                    throw new Error(data.error.message);
+                    throw new Error(data.error.message || data.error.status);
                 }
                 
-                const botReply = data.candidates[0].content.parts[0].text;
-                appendMessage(botReply, 'bot');
+                if (data.candidates && data.candidates[0].content) {
+                    const botReply = data.candidates[0].content.parts[0].text;
+                    appendMessage(botReply, 'bot');
+                } else {
+                    throw new Error("Empty response from AI den.");
+                }
+
             } catch (error) {
                 removeLoadingIndicator(loadingId);
                 console.error("Detailed Error Log:", error);
                 
                 let errorDisplay = `<b>I encountered a hurdle, Tiger.</b><br><br>`;
                 
-                // Based on your image_2b8d7c.png, the referer is actually ustshs2016.github.io
-                if (error.message.includes("Restriction") || error.message.includes("blocked")) {
-                    errorDisplay += `My access is blocked by Google. Please update your API key restrictions in Google Cloud Console to include:<br><br>
-                    <code class="bg-gray-200 p-1 block my-2 text-xs">https://ustshs2016.github.io/*</code>
-                    <p class="mt-2 text-xs text-gray-500">Wait about 5 minutes after saving in Google Console before refreshing this page. 🐯</p>`;
+                if (error.message.includes("403") || error.message.includes("PERMISSION_DENIED")) {
+                    errorDisplay += `My access is blocked by Google restrictions. Ensure your Google Console includes:<br><br>
+                    <code class="bg-gray-200 p-1 block my-2 text-xs">https://ustshs2016.github.io/*</code>`;
+                } else if (error.message.includes("404")) {
+                    errorDisplay += `The AI model could not be found in this region. Please verify your API project settings.`;
                 } else {
                     errorDisplay += `Details: ${error.message}`;
                 }

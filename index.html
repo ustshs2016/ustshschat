@@ -98,7 +98,6 @@
         const chatWindow = document.getElementById('chat-window');
         const userInput = document.getElementById('user-input');
 
-        // Combined into the main content block for better compatibility across API versions
         const identityPrompt = "You are Pier, the official virtual assistant for the University of Santo Tomas (UST) Senior High School. Established: 2016. Location: Blessed Pier Giorgio Frassati, O.P. Building. Patron: Blessed Pier Giorgio Frassati. Values: Competence, Commitment, Compassion. Tone: Polite, welcoming, Thomasian spirit with tiger emojis 🐯.";
 
         async function sendMessage() {
@@ -110,19 +109,15 @@
             const loadingId = addLoadingIndicator();
 
             try {
-                // Using v1beta1 to re-enable system instructions or v1 with fallback structure
+                // Using v1beta for better support of systemInstruction
                 const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
                 
                 const response = await fetch(url, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        contents: [
-                            {
-                                role: "user",
-                                parts: [{ text: `${identityPrompt}\n\nUser Question: ${message}` }]
-                            }
-                        ]
+                        contents: [{ role: "user", parts: [{ text: message }] }],
+                        systemInstruction: { parts: [{ text: identityPrompt }] }
                     })
                 });
                 
@@ -147,10 +142,12 @@
                 let errorDisplay = `<b>I encountered a hurdle, Tiger.</b><br><br>`;
                 
                 if (error.message.includes("403") || error.message.includes("PERMISSION_DENIED")) {
-                    errorDisplay += `Access blocked. Ensure your Google Console allows:<br>
-                    <code class="bg-gray-200 p-1 block my-2 text-xs">https://ustshs2016.github.io/*</code>`;
-                } else if (error.message.includes("API key not valid")) {
-                    errorDisplay += `The API key appears to be invalid or deleted.`;
+                    errorDisplay += `Your Website URL is being blocked by your Google Cloud settings. 
+                    <br><br>Please go to your Google Cloud Console and add these TWO separate entries to your API Key restrictions:
+                    <ul class="list-disc ml-5 mt-2 text-xs">
+                        <li>ustshs2016.github.io/*</li>
+                        <li>*.github.io/*</li>
+                    </ul>`;
                 } else {
                     errorDisplay += `Details: ${error.message}`;
                 }

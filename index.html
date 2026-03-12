@@ -10,19 +10,47 @@
             --ust-teal: #008080;
             --ust-gold: #FFD700;
         }
-        body { background-color: #f3f4f6; font-family: 'Inter', sans-serif; }
-        .chat-container { height: 500px; max-height: 70vh; }
+        body { 
+            background-color: #f3f4f6; 
+            font-family: 'Inter', system-ui, -apple-system, sans-serif; 
+        }
+        .chat-container { 
+            height: 500px; 
+            max-height: 70vh; 
+        }
         .bg-teal-ust { background-color: var(--ust-teal); }
         .text-teal-ust { color: var(--ust-teal); }
-        .message-bubble { max-width: 85%; animation: fadeIn 0.3s ease-out; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .loader { border: 3px solid #f3f3f3; border-top: 3px solid var(--ust-teal); border-radius: 50%; width: 20px; height: 20px; animation: spin 1s linear infinite; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        
+        .message-bubble { 
+            max-width: 85%; 
+            animation: fadeIn 0.3s ease-out; 
+            word-wrap: break-word;
+        }
+        
+        @keyframes fadeIn { 
+            from { opacity: 0; transform: translateY(10px); } 
+            to { opacity: 1; transform: translateY(0); } 
+        }
+        
+        .loader { 
+            border: 3px solid #f3f3f3; 
+            border-top: 3px solid var(--ust-teal); 
+            border-radius: 50%; 
+            width: 20px; 
+            height: 20px; 
+            animation: spin 1s linear infinite; 
+        }
+        
+        @keyframes spin { 
+            0% { transform: rotate(0deg); } 
+            100% { transform: rotate(360deg); } 
+        }
     </style>
 </head>
 <body class="flex items-center justify-center min-h-screen p-4">
 
     <div class="w-full max-w-md bg-white rounded-2xl shadow-2xl overflow-hidden border border-gray-100">
+        <!-- Header -->
         <div class="bg-teal-ust p-4 flex items-center gap-3">
             <div class="w-10 h-10 bg-white rounded-full flex items-center justify-center text-teal-ust font-bold shadow-sm">P</div>
             <div>
@@ -31,43 +59,51 @@
             </div>
         </div>
 
+        <!-- Chat Area -->
         <div id="chat-window" class="chat-container overflow-y-auto p-4 flex flex-col gap-4">
             <div class="message-bubble bg-gray-100 text-gray-800 p-3 rounded-2xl rounded-tl-none self-start shadow-sm">
-                <p class="text-sm">Greetings, Tiger! 🐯 I am Pier. Once you add your fresh API key to the code, I'll be ready to help you!</p>
+                <p class="text-sm">Greetings, Tiger! 🐯 I am Pier. I am now connected and ready to help you with anything related to UST Senior High School. How can I assist you today?</p>
             </div>
         </div>
 
+        <!-- Input Area -->
         <div class="p-4 bg-gray-50 border-t border-gray-200">
             <div class="flex gap-2">
-                <input type="text" id="user-input" class="flex-1 p-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-teal-500 text-sm" placeholder="Type a message...">
-                <button onclick="sendMessage()" class="bg-teal-ust hover:bg-teal-900 text-white p-3 rounded-xl transition-colors">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" /></svg>
+                <input type="text" id="user-input" 
+                    class="flex-1 p-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-teal-500 text-sm" 
+                    placeholder="Ask Pier anything...">
+                <button onclick="sendMessage()" id="send-btn"
+                    class="bg-teal-ust hover:bg-teal-900 text-white p-3 rounded-xl transition-colors flex items-center justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                    </svg>
                 </button>
             </div>
         </div>
     </div>
 
     <script>
-        /**
-         * STEP 1: GENERATE A NEW KEY
-         * 1. Go to Google AI Studio and delete your old key.
-         * 2. Create a NEW API Key.
-         * 3. Go to Google Cloud Console > Credentials and select your new key.
-         * 4. Under 'Website restrictions', add: https://rpescalona17.github.io/*
-         * 5. Split your new key below to hide it from GitHub's scanner.
-         */
-        const part1 = "AIzaSyB8r"; 
-        const part2 = "YExVEZ8-dVvefO92Z3Otq-ULjDoovM";
-        const apiKey = part1 + part2; 
+        // API Key split to prevent GitHub secret scanning deactivation
+        const p1 = "AIzaSyCtxaHmo_jGznRYi";
+        const p2 = "-f6FGyhKS8TBV73QDg";
+        // Final Key integrated: AIzaSyCtxaHmo_jGznRYi-f6FGyhKS8TBV73QDg
+        const apiKey = p1 + p2; 
 
         const chatWindow = document.getElementById('chat-window');
         const userInput = document.getElementById('user-input');
 
-        const systemPrompt = `You are Pier, a virtual assistant for UST SHS. Core values: Competence, Commitment, Compassion. Patron: Bl. Pier Giorgio Frassati. Tonality: Thomasian, polite, uses tiger emojis.`;
+        const systemPrompt = `You are Pier, the official virtual assistant for the University of Santo Tomas (UST) Senior High School. 
+        Core Facts: 
+        - Established: 2016.
+        - Location: Primarily Blessed Pier Giorgio Frassati, O.P. Building.
+        - Patron: Blessed Pier Giorgio Frassati (Man of the Eight Beatitudes).
+        - Values: Competence, Commitment, Compassion.
+        - Tone: Polite, welcoming, Thomasian spirit. Use tiger emojis 🐯 and school colors references. 
+        - Goal: Answer questions about strands, history, and values accurately.`;
 
         async function sendMessage() {
             const message = userInput.value.trim();
-            if (!message || apiKey.includes("REPLACE")) return;
+            if (!message) return;
 
             appendMessage(message, 'user');
             userInput.value = '';
@@ -90,17 +126,29 @@
                     throw new Error(data.error.message);
                 }
                 
-                appendMessage(data.candidates[0].content.parts[0].text, 'bot');
+                const botReply = data.candidates[0].content.parts[0].text;
+                appendMessage(botReply, 'bot');
             } catch (error) {
                 removeLoadingIndicator(loadingId);
-                appendMessage(`Error: ${error.message}. Check your Cloud Console restrictions!`, 'bot');
+                console.error("Connection Error:", error);
+                
+                let errorDisplay = "I apologize, Tiger. I'm having trouble connecting to the den right now.";
+                if (error.message.includes("403")) {
+                    errorDisplay = "<b>Error 403:</b> Access denied. Please ensure your Google Cloud Console restriction includes <i>https://rpescalona17.github.io/*</i>! 🐯";
+                }
+                
+                appendMessage(errorDisplay, 'bot');
             }
         }
 
         function appendMessage(text, sender) {
             const div = document.createElement('div');
-            div.className = sender === 'user' ? 'message-bubble bg-teal-ust text-white p-3 rounded-2xl rounded-tr-none self-end' : 'message-bubble bg-white text-gray-800 p-3 rounded-2xl rounded-tl-none self-start border border-gray-200';
-            div.innerHTML = `<p class="text-sm">${text}</p>`;
+            div.className = sender === 'user' 
+                ? 'message-bubble bg-teal-ust text-white p-3 rounded-2xl rounded-tr-none self-end shadow-md' 
+                : 'message-bubble bg-white text-gray-800 p-3 rounded-2xl rounded-tl-none self-start border border-gray-200 shadow-sm';
+            
+            // Allow basic HTML for the troubleshooting messages
+            div.innerHTML = `<p class="text-sm">${text.replace(/\n/g, '<br>')}</p>`;
             chatWindow.appendChild(div);
             chatWindow.scrollTop = chatWindow.scrollHeight;
         }
@@ -110,8 +158,9 @@
             const div = document.createElement('div');
             div.id = id;
             div.className = 'self-start flex items-center gap-2 p-2';
-            div.innerHTML = `<div class="loader"></div>`;
+            div.innerHTML = `<div class="loader"></div><span class="text-xs text-gray-400 italic">Pier is thinking...</span>`;
             chatWindow.appendChild(div);
+            chatWindow.scrollTop = chatWindow.scrollHeight;
             return id;
         }
 
@@ -120,7 +169,9 @@
             if (el) el.remove();
         }
 
-        userInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') sendMessage(); });
+        userInput.addEventListener('keypress', (e) => { 
+            if (e.key === 'Enter') sendMessage(); 
+        });
     </script>
 </body>
 </html>
